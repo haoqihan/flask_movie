@@ -50,7 +50,13 @@
                             <tr>
                                 <td class="td_bd">头像：</td>
                                 <td>
+                                    {% if user.dace %}
                                     <img src="{{ url_for('static',filename='uploads/user/'+user.face) }}" style="height: 50px" class="img-responsive" alt="">
+
+                                    {% else %}
+                                    <img data-src="holder.js/100*100" style="height: 50px" class="img-responsive" alt="">
+                                    {% endif %}
+
                                 </td>
                             </tr>
                             <tr>
