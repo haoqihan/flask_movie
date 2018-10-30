@@ -326,3 +326,41 @@ def play(id=None,page=None):
     db.session.add(movie)
     db.session.commit()
     return render_template('home/play.html', movie=movie,form=form,pagedata=pagedata)
+
+
+# 弹幕播放
+@home.route("/video/<int:id>/<int:page>/",methods=['GET','POST'])
+def video(id=None,page=None):
+    form = CommentForm()
+    movie = Movie.query.join(Tag).filter(Tag.id == Movie.tag_id, Movie.id == int(id)).first_or_404()
+    if page is None:
+        page = 1
+    pagedata = Comment.query.join(
+        Movie
+    ).join(
+        User
+    ).filter(
+        Movie.id == movie.id,
+        User.id == Comment.user_id
+    ).order_by(
+        Comment.addtime.desc()
+    ).paginate(page=page, per_page=10)
+    movie.playnum += 1
+    if 'user' in session and form.validate_on_submit():
+        data = form.data
+        comment = Comment(
+            content=data['content'],
+            movie_id=movie.id,
+            user_id=session['user_id']
+        )
+        db.session.add(comment)
+        db.session.commit()
+        movie.commentnum += 1
+        db.session.add(movie)
+        db.session.commit()
+        flash('添加评论成功','ok')
+        return redirect(url_for('home.play',id=movie.id,page=1))
+    db.session.add(movie)
+    db.session.commit()
+    return render_template('home/video.html', movie=movie,form=form,pagedata=pagedata)
+
